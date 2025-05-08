@@ -7,7 +7,6 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
-    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         :root {
@@ -570,10 +569,6 @@
                     </div>
                 </div>
 
-                <div class="subsection">
-                    <div class="g-recaptcha" data-sitekey="YOUR_RECAPTCHA_SITE_KEY"></div>
-                </div>
-
                 <div class="form-footer">
                     <button type="button" class="btn btn-secondary" onclick="previousStep(4)"><i class="fas fa-arrow-right me-2"></i> السابق</button>
                     <div>
@@ -921,29 +916,73 @@
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
 
-            doc.setFont("Amiri", "normal");
+            // إعداد الخط Times New Roman مع دعم العربية
+            doc.setFont("times", "normal");
             doc.setFontSize(16);
-            doc.text("استمارة تسجيل - جامعة البليدة 2", 105, 20, { align: "center" });
 
+            // إضافة رأس (Header)
+            doc.setFillColor(18, 75, 143);
+            doc.rect(0, 0, 210, 20, 'F');
+            doc.setTextColor(255, 255, 255);
+            doc.text("جامعة لونيسي علي - البليدة 2", 105, 10, { align: "center" });
+            doc.setTextColor(0, 0, 0);
+
+            // إضافة شعار افتراضي (مربع نائب)
+            doc.setFillColor(200, 200, 200);
+            doc.rect(10, 25, 30, 30, 'F');
+            doc.setFontSize(10);
+            doc.text("شعار الجامعة", 25, 40, { align: "center" });
+
+            // عنوان الاستمارة
+            doc.setFontSize(14);
+            doc.text("استمارة تسجيل - كلية العلوم الإنسانية والاجتماعية", 105, 65, { align: "center" });
+
+            // إضافة حدود للمعلومات
+            doc.setLineWidth(0.5);
+            doc.rect(10, 70, 190, 200);
+
+            // المعلومات الشخصية
             doc.setFontSize(12);
-            doc.text(`الاسم: ${document.getElementById('fname').value}`, 180, 40, { align: "right" });
-            doc.text(`اللقب: ${document.getElementById('lname').value}`, 180, 50, { align: "right" });
-            doc.text(`Nom: ${document.getElementById('nom').value}`, 180, 60, { align: "right" });
-            doc.text(`Prénom: ${document.getElementById('prenom').value}`, 180, 70, { align: "right" });
-            doc.text(`تاريخ الميلاد: ${formatDate(document.getElementById('birthdate').value)}`, 180, 80, { align: "right" });
-            doc.text(`مكان الميلاد: ${document.getElementById('birthplace').value}`, 180, 90, { align: "right" });
-            doc.text(`البريد الإلكتروني: ${document.getElementById('email').value}`, 180, 100, { align: "right" });
-            doc.text(`رقم الهاتف: ${document.getElementById('phone').value}`, 180, 110, { align: "right" });
-            doc.text(`رقم التسجيل: ${document.getElementById('registrationNumber').value}`, 180, 120, { align: "right" });
-            doc.text(`القسم: ${selectedDepartment === 'socialSciences' ? 'العلوم الاجتماعية' : 'العلوم الإنسانية'}`, 180, 130, { align: "right" });
+            doc.text("المعلومات الشخصية", 195, 80, { align: "right" });
+            doc.setLineWidth(0.2);
+            doc.line(10, 85, 200, 85);
+
+            const personalInfo = [
+                `الاسم: ${document.getElementById('fname').value}`,
+                `اللقب: ${document.getElementById('lname').value}`,
+                `Nom: ${document.getElementById('nom').value}`,
+                `Prénom: ${document.getElementById('prenom').value}`,
+                `تاريخ الميلاد: ${formatDate(document.getElementById('birthdate').value)}`,
+                `مكان الميلاد: ${document.getElementById('birthplace').value}`,
+                `البريد الإلكتروني: ${document.getElementById('email').value}`,
+                `رقم الهاتف: ${document.getElementById('phone').value}`,
+                `رقم التسجيل: ${document.getElementById('registrationNumber').value}`
+            ];
+
+            personalInfo.forEach((info, index) => {
+                doc.text(info, 195, 95 + index * 10, { align: "right" });
+            });
+
+            // القسم والتخصصات
+            doc.text("القسم والتخصصات", 195, 185, { align: "right" });
+            doc.line(10, 190, 200, 190);
+            doc.text(`القسم: ${selectedDepartment === 'socialSciences' ? 'العلوم الاجتماعية' : 'العلوم الإنسانية'}`, 195, 200, { align: "right" });
 
             const specialties = selectedDepartment === 'socialSciences' ? socialSciencesSpecialties : humanitiesSpecialties;
             const sortedSpecialties = specialties.filter(s => s.order !== -1).sort((a, b) => a.order - b.order);
-            doc.text("التخصصات:", 180, 140, { align: "right" });
             sortedSpecialties.forEach((spec, index) => {
-                doc.text(`الرغبة ${spec.order}: ${spec.name}`, 180, 150 + index * 10, { align: "right" });
+                doc.text(`الرغبة ${spec.order}: ${spec.name}`, 195, 210 + index * 10, { align: "right" });
             });
 
+            // تذييل (Footer)
+            doc.setFillColor(18, 75, 143);
+            doc.rect(0, 277, 210, 20, 'F');
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(10);
+            doc.text("© 2025 جامعة لونيسي علي - البليدة 2", 105, 287, { align: "center" });
+            doc.setTextColor(0, 0, 0);
+
+            // حفظ الملف
             doc.save('registration_form.pdf');
         }
 
@@ -957,28 +996,11 @@
                 confirmAccuracy.classList.remove('is-invalid');
             }
 
-            const recaptchaResponse = grecaptcha.getResponse();
-            if (!recaptchaResponse) {
-                showAlert('يرجى التحقق من reCAPTCHA', 'danger');
-                return;
-            }
-
             const submitButton = document.getElementById('submitButton');
             submitButton.disabled = true;
             submitButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> جاري الإرسال...';
 
             try {
-                // التحقق من reCAPTCHA
-                const recaptchaVerification = await fetch('https://www.google.com/recaptcha/api/siteverify', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: `secret=YOUR_RECAPTCHA_SECRET_KEY&response=${recaptchaResponse}`
-                });
-                const recaptchaResult = await recaptchaVerification.json();
-                if (!recaptchaResult.success) {
-                    throw new Error('فشل التحقق من reCAPTCHA');
-                }
-
                 // جمع البيانات
                 const form = document.getElementById('registrationForm');
                 const formData = new FormData(form);
@@ -1008,8 +1030,7 @@
                     preference4: preferences[3] || '',
                     preference5: preferences[4] || '',
                     confirm_accuracy: formData.get('confirm_accuracy') ? 'نعم' : 'لا',
-                    created_at: new Date().toISOString(),
-                    recaptcha_response: recaptchaResponse
+                    created_at: new Date().toISOString()
                 };
 
                 // التحقق من الحقول المطلوبة
